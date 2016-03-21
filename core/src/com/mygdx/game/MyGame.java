@@ -8,17 +8,17 @@ import com.mygdx.game.Screens.MainMenuScreen;
 public class MyGame extends Game {
 
     // for all the screens
-	public SpriteBatch batch;
+    public SpriteBatch batch;
     public BitmapFont font;
 
 
     @Override
-	public void create () {
-		batch = new SpriteBatch();
+    public void create () {
+	batch = new SpriteBatch();
         //Use LibGDX's default Arial font.
         font = new BitmapFont();
         setScreen(new MainMenuScreen(this));
-	}
+    }
 
     @Override
     public void render () {
