@@ -10,3 +10,6 @@ Libgdx is a crossplatform (Desktop/Android/BlackBerry/iOS/HTML5) Java game devel
 This project was made in Android Studio. One way to open this project is by 
 opening Android Studio and from the Quick Start menu choose the 
 Import project(Eclipse ADT, Gradle, etc.)
+
+Attribution
+Game music by Eric Skiff http://ericskiff.com/music/
