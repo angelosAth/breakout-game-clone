@@ -12,4 +12,5 @@ opening Android Studio and from the Quick Start menu choose the
 Import project(Eclipse ADT, Gradle, etc.)
 
 Attribution
+------------
 Game music by Eric Skiff http://ericskiff.com/music/
