@@ -1,5 +1,6 @@
 package com.mygdx.game.Screens;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -125,17 +126,24 @@ public class GameScreen implements Screen {
         myGame.batch.end();
 
 
-        // process user input
-        if (Gdx.input.isTouched()) {
-            Vector3 touchPos = new Vector3();
-            touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            cam.unproject(touchPos);
-            gamePaddle.paddle.x = touchPos.x - 64 / 2;
+        ApplicationType appType = Gdx.app.getType();
+
+        // should work also with Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer)
+        if (appType == ApplicationType.Android || appType == ApplicationType.iOS) {
+            gamePaddle.paddle.x += Gdx.input.getAccelerometerY() * PADDLE_SPEED * delta;
+        } else {
+            // process user input
+            if (Gdx.input.isTouched()) {
+                Vector3 touchPos = new Vector3();
+                touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+                cam.unproject(touchPos);
+                gamePaddle.paddle.x = touchPos.x - 64 / 2;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+                gamePaddle.paddle.x -= PADDLE_SPEED * delta;
+            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+                gamePaddle.paddle.x += PADDLE_SPEED * delta;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-            gamePaddle.paddle.x -= PADDLE_SPEED * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-            gamePaddle.paddle.x += PADDLE_SPEED * delta;
 
         //if we lose all game lives go back to main screen
         if (lives < 0){

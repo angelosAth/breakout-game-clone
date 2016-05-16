@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/home/angel/Desktop/libgdxGame/games/breakoutGameClone-master/core/build/libs/core-1.0.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="c74b54f42e6ad89b416a9d5d653eb5e3da184e37">
+        <dex dex="/home/angel/Desktop/libgdxGame/games/breakoutGameClone-master/android/build/intermediates/pre-dexed/debug/core-1.0_1a840b9395359116fd9c6fc210c470754e2242af.jar" />
+    </item>
+
+</items>
