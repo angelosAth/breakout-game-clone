@@ -1,11 +1,12 @@
-package com.mygdx.game.Screens;
+package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.mygdx.game.MyGame;
-import static com.mygdx.game.Util.Constants.*;
+
+import static com.mygdx.game.util.Constants.*;
 
 
 /**
@@ -14,7 +15,7 @@ import static com.mygdx.game.Util.Constants.*;
 public class MainMenuScreen implements Screen {
     //reference to our game
     private MyGame myGame;
-    OrthographicCamera cam;
+    private OrthographicCamera cam;
     private boolean win;
 
     public MainMenuScreen(MyGame myGame) {
@@ -31,7 +32,6 @@ public class MainMenuScreen implements Screen {
         cam.setToOrtho(false, HEIGHT, WIDTH);
         //boolean is true means the player won
         this.win = win;
-
     }
 
     @Override
@@ -61,12 +61,10 @@ public class MainMenuScreen implements Screen {
         }
     }
 
-
     @Override
     public void show() {
 
     }
-
 
     @Override
     public void resize(int width, int height) {

@@ -1,4 +1,4 @@
-package com.mygdx.game.Util;
+package com.mygdx.game.util;
 
 /**
  * Created by angel on 17/3/2016.

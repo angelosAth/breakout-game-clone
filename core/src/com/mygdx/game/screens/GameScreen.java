@@ -1,4 +1,4 @@
-package com.mygdx.game.Screens;
+package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
@@ -15,10 +15,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MyGame;
-import com.mygdx.game.Sprites.Ball;
-import com.mygdx.game.Sprites.Bricks;
-import com.mygdx.game.Sprites.Paddle;
-import static com.mygdx.game.Util.Constants.*;
+import com.mygdx.game.sprites.Ball;
+import com.mygdx.game.sprites.Bricks;
+import com.mygdx.game.sprites.Paddle;
+import static com.mygdx.game.util.Constants.*;
 
 
 /**
@@ -48,12 +48,13 @@ public class GameScreen implements Screen {
     public Texture brickImage;
     public Texture ballImage;
 
-    Sound hitSound;
-    Sound loseSound;
-    Sound hitPaddleSound;
-    Music music;
+    private Sound hitSound;
+    private Sound loseSound;
+    private Sound hitPaddleSound;
+    private Music music;
 
-    OrthographicCamera cam;
+    private OrthographicCamera cam;
+    ApplicationType appType;
 
 
     public GameScreen (MyGame myGame){
@@ -65,16 +66,15 @@ public class GameScreen implements Screen {
         numOfBricks = 0;
         brickses = new Array<Bricks>();
         //division of the paddle to three parts
-        aPaddlePart = (int)gamePaddle.paddle.x;
-        bPaddlePart = (int)gamePaddle.paddle.x + 21;
-        cPaddlePart = (int)gamePaddle.paddle.x + 40;
-
+        aPaddlePart = (int)gamePaddle.getPaddle().x;
+        bPaddlePart = (int)gamePaddle.getPaddle().x + 21;
+        cPaddlePart = (int)gamePaddle.getPaddle().x + 40;
 
         // load the drop sound effect and the background music
-        hitSound = Gdx.audio.newSound(Gdx.files.internal("hit.wav"));
-        hitPaddleSound = Gdx.audio.newSound(Gdx.files.internal("pop.wav"));
-        loseSound = Gdx.audio.newSound(Gdx.files.internal("lose.wav"));
-        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+        hitSound = Gdx.audio.newSound(Gdx.files.internal("sound/hit.wav"));
+        hitPaddleSound = Gdx.audio.newSound(Gdx.files.internal("sound/pop.wav"));
+        loseSound = Gdx.audio.newSound(Gdx.files.internal("sound/lose.wav"));
+        music = Gdx.audio.newMusic(Gdx.files.internal("sound/music.mp3"));
         music.setLooping(true);
 
         // create the camera
@@ -84,13 +84,15 @@ public class GameScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(cam.combined);
 
+        //for the accelerometer
+        appType = Gdx.app.getType();
+
         ballXmove = MathUtils.random(-300, 300);
         ballYmove = 300;
 
         makeBricks();
 
     }
-
 
     @Override
     public void show() {
@@ -116,35 +118,46 @@ public class GameScreen implements Screen {
         myGame.batch.begin();
         myGame.font.draw(myGame.batch, "Bricks Destroyed: " + bricksDestroyed, 0, 480);
         myGame.font.draw(myGame.batch, "Lives Left: " + lives, 700, 480);
-        myGame.batch.draw(paddleImage, gamePaddle.paddle.x, gamePaddle.paddle.y);
+        myGame.batch.draw(paddleImage, gamePaddle.getPaddle().x, gamePaddle.getPaddle().y);
         for (int i = 0; i < NUM_OF_BRICKS; i++) {
             if (!bricks[i].isDestroyed()) {
-                myGame.batch.draw(brickImage, bricks[i].brick.x, bricks[i].brick.y);
+                myGame.batch.draw(brickImage, bricks[i].getBrick().x, bricks[i].getBrick().y);
             }
         }
-        myGame.batch.draw(ballImage, gameBall.ball.x, gameBall.ball.y);
+        myGame.batch.draw(ballImage, gameBall.getBall().x, gameBall.getBall().y);
         myGame.batch.end();
 
+        gameControls(delta);
+        ballWallCollision();
+        ballMovement(delta);
+        paddleScreenBounds();
+        debugRenderer();
+        ballHitBrick();
+        ballHitPaddle();
+        checkBallSpeed();
+        isGameDone();
+    }
 
-        ApplicationType appType = Gdx.app.getType();
-
-        // should work also with Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer)
+    private void gameControls(float delta){
+        // Accelerometer and keyboard controls
         if (appType == ApplicationType.Android || appType == ApplicationType.iOS) {
-            gamePaddle.paddle.x += Gdx.input.getAccelerometerY() * PADDLE_SPEED * delta;
+            gamePaddle.getPaddle().x += Gdx.input.getAccelerometerY() * PADDLE_SPEED * delta;
         } else {
             // process user input
             if (Gdx.input.isTouched()) {
                 Vector3 touchPos = new Vector3();
                 touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
                 cam.unproject(touchPos);
-                gamePaddle.paddle.x = touchPos.x - 64 / 2;
+                gamePaddle.getPaddle().x = touchPos.x - 64 / 2;
             }
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-                gamePaddle.paddle.x -= PADDLE_SPEED * delta;
+                gamePaddle.getPaddle().x -= PADDLE_SPEED * delta;
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-                gamePaddle.paddle.x += PADDLE_SPEED * delta;
+                gamePaddle.getPaddle().x += PADDLE_SPEED * delta;
         }
+    }
 
+    private void isGameDone(){
         //if we lose all game lives go back to main screen
         if (lives < 0){
             myGame.setScreen(new MainMenuScreen(myGame));
@@ -153,15 +166,6 @@ public class GameScreen implements Screen {
         //we destroyed all the bricks so we put true for the boolean in the constructor
         if (numOfBricks < 1)
             myGame.setScreen(new MainMenuScreen(myGame, true));
-
-
-        ballWallCollision();
-        ballMovement(delta);
-        paddleScreenBounds();
-        debugRenderer();
-        ballHitBrick();
-        ballHitPaddle();
-        checkBallSpeed();
     }
 
     //the direction of the ball after it hits the game borders
@@ -169,31 +173,30 @@ public class GameScreen implements Screen {
     //hear the lose sound and the ball starts over
     //the initial position
     private void ballWallCollision () {
-        if (gameBall.ball.x < 0)
+        if (gameBall.getBall().x < 0)
             ballXmove *= -1;
-        if (gameBall.ball.x > 790)
+        if (gameBall.getBall().x > 790)
             ballXmove *= -1;
-        if (gameBall.ball.y < 0) {
+        if (gameBall.getBall().y < 0) {
             gameBall.initial();
             loseSound.play();
             lives--;
         }
-        if (gameBall.ball.y > 470)
+        if (gameBall.getBall().y > 470)
             ballYmove *= -1;
     }
 
-
     private void ballMovement(float delta){
-        gameBall.ball.x += ballXmove * delta;
-        gameBall.ball.y += ballYmove * delta;
+        gameBall.getBall().x += ballXmove * delta;
+        gameBall.getBall().y += ballYmove * delta;
     }
 
     private void paddleScreenBounds(){
         // make sure the paddle stays within the screen bounds
-        if (gamePaddle.paddle.x < 1)
-            gamePaddle.paddle.x = 1 ;
-        if (gamePaddle.paddle.x > 800 - 64)
-            gamePaddle.paddle.x = 800 - 64;
+        if (gamePaddle.getPaddle().x < 1)
+            gamePaddle.getPaddle().x = 1 ;
+        if (gamePaddle.getPaddle().x > 800 - 64)
+            gamePaddle.getPaddle().x = 800 - 64;
     }
 
     private void makeBricks(){
@@ -215,8 +218,8 @@ public class GameScreen implements Screen {
         for (int i=0; i < NUM_OF_BRICKS; i++) {
             //Draws the brick if it is not destroyed
             if (!bricks[i].isDestroyed()) {
-                shapeRenderer.rect(bricks[i].brick.x, bricks[i].brick.y,
-                        bricks[i].brick.width, bricks[i].brick.height);
+                shapeRenderer.rect(bricks[i].getBrick().x, bricks[i].getBrick().y,
+                        bricks[i].getBrick().width, bricks[i].getBrick().height);
             }
         }
         shapeRenderer.end();
@@ -226,7 +229,7 @@ public class GameScreen implements Screen {
     //the brick dies and we hear the crash sound
     private void ballHitBrick(){
         for (int i = 0; i < NUM_OF_BRICKS; i++) {
-            if (Intersector.overlaps(gameBall.ball, bricks[i].brick)) {
+            if (Intersector.overlaps(gameBall.getBall(), bricks[i].getBrick())) {
                 if (!bricks[i].isDestroyed()) {
                     bricks[i].setDestroyed();
                     bricksDestroyed++;
@@ -241,12 +244,12 @@ public class GameScreen implements Screen {
     // the direction of the ball when it hits the paddle
     //which depends on the part of the paddle it hits
     private void ballHitPaddle(){
-        if (Intersector.overlaps(gameBall.ball, gamePaddle.paddle)) {
-            if ((gameBall.ball.x) >= aPaddlePart && (gameBall.ball.x) < bPaddlePart){
+        if (Intersector.overlaps(gameBall.getBall(), gamePaddle.getPaddle())) {
+            if ((gameBall.getBall().x) >= aPaddlePart && (gameBall.getBall().x) < bPaddlePart){
                 ballYmove *= -1;
                 ballXmove -=150;
             }
-            else if ((gameBall.ball.x) >= bPaddlePart && (gameBall.ball.x) < cPaddlePart){
+            else if ((gameBall.getBall().x) >= bPaddlePart && (gameBall.getBall().x) < cPaddlePart){
                 ballYmove *= -1;
             }
             else{
@@ -300,6 +303,4 @@ public class GameScreen implements Screen {
         music.dispose();
 
     }
-
-
 }
