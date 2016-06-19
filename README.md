@@ -1,4 +1,4 @@
-# breakoutGameClone
+# breakout-game-clone
 A simple breakout clone in Java and Libgdx 
 
 Libgdx is a crossplatform (Desktop/Android/BlackBerry/iOS/HTML5) Java game development framework
