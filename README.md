@@ -4,12 +4,12 @@ A simple breakout clone in Java and Libgdx
 Libgdx is a crossplatform (Desktop/Android/BlackBerry/iOS/HTML5) Java game development framework
 
 
-Installation 
+Running 
 --------------
 
 This project was made in Android Studio. One way to run this project is by 
 opening Android Studio and from the Quick Start menu choose the 
-Import project(Eclipse ADT, Gradle, etc.)
+Import project(Eclipse ADT, Gradle, etc).
 
 By default there is an android option to run the game (after connecting an android device).
 In order to run the game in the desktop --> Select Run / Debug Configuration --> Edit Configurations...--> ADD(+) and choose Gradle --> In the form put for Name: Desktop and in Tasks: desktop:run.
